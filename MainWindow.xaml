@@ -1,0 +1,133 @@
+﻿<Window x:Class="saper1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:saper1"
+        mc:Ignorable="d"
+        Title="Sapper" Height="550" Width="550" ResizeMode="NoResize" WindowStyle="None" Background="Transparent" Foreground="Transparent" BorderBrush="Transparent" AllowsTransparency="True" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Window.Resources>
+        <LinearGradientBrush x:Key="lbrush" StartPoint="0.5,0" EndPoint="1,0">
+            <GradientStop Color="Violet" Offset="0"/>
+            <GradientStop Color="Blue" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="Gradient" TargetType="{x:Type Border}">
+            <Setter Property="BorderBrush" Value="{StaticResource lbrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Background" Value="#212121"/>
+        </Style>
+
+        <Style x:Key="Playfield" TargetType="{x:Type Border}">
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="#555759"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Opacity" Value="0.5"/>
+            <Setter Property="Background" Value="#7b828c"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="False">
+                    <Setter Property="Opacity" Value="0.5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="selectedSquare" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="#939c81"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        
+    </Window.Resources>
+
+    <Grid x:Name="MainContainer">
+        <Border x:Name="Main" Style="{StaticResource Gradient}">
+            <Border.BorderBrush>
+                <LinearGradientBrush x:Name="lbrush" StartPoint="0.5,0" EndPoint="1,0">
+                    <GradientStop Color="Violet" Offset="0"/>
+                    <GradientStop Color="LightSkyBlue" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="Border.Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                            <ColorAnimation Storyboard.TargetName="lbrush"
+                                                Storyboard.TargetProperty="GradientStops[0].Color"
+                                                From="Violet" To="LightSkyBlue" Duration="0:0:10"/>
+                            <ColorAnimation Storyboard.TargetName="lbrush"
+                                                Storyboard.TargetProperty="GradientStops[1].Color"
+                                                From="LightSkyBlue" To="Violet" Duration="0:0:10"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
+            <Grid x:Name="playField" ShowGridLines="False" Height="500" Width="500">
+                <Grid.Resources>
+                    <Style TargetType="{x:Type ColumnDefinition}">
+                        <Setter Property="Width" Value="25"/>
+                    </Style>
+                    <Style TargetType="{x:Type RowDefinition}">
+                        <Setter Property="Height" Value="25"/>
+                    </Style>
+                </Grid.Resources>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
