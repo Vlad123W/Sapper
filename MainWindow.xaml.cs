@@ -18,7 +18,7 @@ namespace saper1
         private int ninesOnField;
 
         public int MinesOnField
-           {
+        {
             get => ninesOnField;
             set => ninesOnField = value;
         }

@@ -9,7 +9,7 @@
     <Window.Resources>
         <LinearGradientBrush x:Key="lbrush" StartPoint="0.5,0" EndPoint="1,0">
             <GradientStop Color="Violet" Offset="0"/>
-            <GradientStop Color="Blue" Offset="1"/>
+            <GradientStop Color="LightSkyBlue" Offset="1"/>
         </LinearGradientBrush>
 
         <Style x:Key="Gradient" TargetType="{x:Type Border}">
@@ -46,11 +46,20 @@
             <Setter Property="CornerRadius" Value="3"/>
             <Setter Property="BorderThickness" Value="2"/>
         </Style>
-        
+
     </Window.Resources>
 
-    <Grid x:Name="MainContainer">
-        <Border x:Name="Main" Style="{StaticResource Gradient}">
+    <Grid x:Name="MainContainer" Background="Transparent">
+        <Border x:Name="Toolbar" Panel.ZIndex="2" Height="18" VerticalAlignment="Top" CornerRadius="14" Background="Transparent" BorderThickness="1" Margin="522,10,10,0">
+            <Border.BorderBrush>
+                <LinearGradientBrush x:Name="MainToolbarBrush" StartPoint="0.5,0" EndPoint="1,0">
+                    <GradientStop Color="Violet" Offset="0"/>
+                    <GradientStop Color="LightSkyBlue" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            
+        </Border>
+        <Border x:Name="Main" Panel.ZIndex="1" Style="{StaticResource Gradient}">
             <Border.BorderBrush>
                 <LinearGradientBrush x:Name="lbrush" StartPoint="0.5,0" EndPoint="1,0">
                     <GradientStop Color="Violet" Offset="0"/>
@@ -62,11 +71,11 @@
                     <BeginStoryboard>
                         <Storyboard RepeatBehavior="Forever" AutoReverse="True">
                             <ColorAnimation Storyboard.TargetName="lbrush"
-                                                Storyboard.TargetProperty="GradientStops[0].Color"
-                                                From="Violet" To="LightSkyBlue" Duration="0:0:10"/>
+                                                    Storyboard.TargetProperty="GradientStops[0].Color"
+                                                    From="Violet" To="LightSkyBlue" Duration="0:0:10"/>
                             <ColorAnimation Storyboard.TargetName="lbrush"
-                                                Storyboard.TargetProperty="GradientStops[1].Color"
-                                                From="LightSkyBlue" To="Violet" Duration="0:0:10"/>
+                                                    Storyboard.TargetProperty="GradientStops[1].Color"
+                                                    From="LightSkyBlue" To="Violet" Duration="0:0:10"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
@@ -126,8 +135,8 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-
             </Grid>
         </Border>
     </Grid>
+
 </Window>
