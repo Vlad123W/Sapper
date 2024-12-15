@@ -35,6 +35,12 @@ namespace saper1
         {
             InitializeComponent();
 
+            Main.Loaded += (s, e) =>
+            {
+                Storyboard _storyboard = (Storyboard)Resources["MainAnimation"];
+                _storyboard.Begin(Main);
+            };
+
             Loaded += (s, e) =>
             {              
                 for (int i = 0; i < playField.ColumnDefinitions.Count; i++)
@@ -68,6 +74,14 @@ namespace saper1
                         playField.Children.Add(border);
                     }
                 }  
+            };
+
+            KeyDown += (s, e) =>
+            {
+                if(e.Key == Key.Escape)
+                {
+                    Application.Current.Shutdown();
+                }
             };
         }
 
@@ -110,12 +124,13 @@ namespace saper1
                     }
                 }
 
-                ShowStartView(4, border!);
-
                 foreach (Border item in playField.Children)
                 {
                     CountMinesForAllCells(item);
                 }
+
+                ShowStartView(4, border!);
+
                 OpenedCells++;
                 bombFilling = true;
             }
@@ -123,19 +138,19 @@ namespace saper1
             {
                 if(border?.Child is TextBlock block)
                 {
-                    border.Background = Brushes.Transparent;
-                    block.Visibility = Visibility.Visible;
 
                     if(block.Text == "M")
                     {
                         MessageBox.Show("Game over!");
                         App.Current.Shutdown();
+                        border.Background = Brushes.Transparent;
+                        block.Visibility = Visibility.Visible;
                     }
                     else
                     {
                         int mines = CountNearbyMines(border);
 
-                        if(mines == 0)
+                        if(mines == 0 && border.Background != Brushes.Transparent)
                         {
                             ShowCell(border);
                         }
@@ -146,37 +161,35 @@ namespace saper1
                             App.Current.Shutdown();
                         }
 
+                        border.Background = Brushes.Transparent;
+                        block.Visibility = Visibility.Visible;
                         OpenedCells++;
                     }
                 }
             }
         }
 
-        private void InitializeVariables(ref int rowStart, ref int colStart, ref int rowEnd, ref int colEnd, Border b, int arg)
+        private void InitializeVariables(ref int rowStart, ref int colStart, ref int rowEnd, ref int colEnd)
         {
-            rowStart = Grid.GetRow(b) - arg;
-            colStart = Grid.GetColumn(b) - arg;
-            rowEnd = Grid.GetRow(b) + arg;
-            colEnd = Grid.GetColumn(b) + arg;
-
+           
             if (colStart < 0)
             {
-                colStart -= arg;
+                colStart = 0;
             }
 
             if (rowStart < 0)
             {
-                rowStart -= arg;
+                rowStart = 0;
             }
 
             if (rowEnd > 20)
             {
-                rowEnd -= rowEnd + arg;
+                rowEnd = 20;
             }
 
             if (colEnd > 20)
             {
-                colEnd -= colEnd + arg;
+                colEnd = 20;
             }
         }
 
@@ -231,12 +244,12 @@ namespace saper1
         {
             int count = 0;
 
-            int rowStart = 0;
-            int colStart = 0;
-            int rowEnd = 0;
-            int colEnd = 0;
+            int rowStart = Grid.GetRow(clickedBorder) - 1;
+            int colStart = Grid.GetColumn(clickedBorder) - 1;
+            int rowEnd = Grid.GetRow(clickedBorder) + 1;
+            int colEnd = Grid.GetColumn(clickedBorder) + 1;
 
-            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd, clickedBorder, 1);
+            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd);
 
             for (int i = rowStart; i <= rowEnd; i++)
             {
@@ -261,12 +274,12 @@ namespace saper1
 
         private void ShowStartView(int radius, Border startPositionBorder)
         {
-            int rowStart = 0;
-            int colStart = 0;
-            int rowEnd = 0;
-            int colEnd = 0;
+            int rowStart = Grid.GetRow(startPositionBorder) - radius;
+            int colStart = Grid.GetColumn(startPositionBorder) - radius;
+            int rowEnd = Grid.GetRow(startPositionBorder) + radius;
+            int colEnd = Grid.GetColumn(startPositionBorder) + radius;
             
-            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd, startPositionBorder, radius);
+            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd);
             
             for (int i = rowStart; i <= rowEnd; i++)
             {
@@ -278,8 +291,6 @@ namespace saper1
 
                     if (element?.Child is TextBlock block && block.Text != "M")
                     {
-                        int mines = CountNearbyMines(element);
-                        block.Text = mines == 0 ? "" : mines.ToString();
                         element.Background = Brushes.Transparent;
                         block.Visibility = Visibility.Visible;
                         OpenedCells++;
@@ -290,12 +301,12 @@ namespace saper1
 
         private void CountMinesForAllCells(Border b)
         {
-            int rowStart = 0;
-            int colStart = 0;
-            int rowEnd = 0;
-            int colEnd = 0;
+            int rowStart = Grid.GetRow(b) - 1;
+            int colStart = Grid.GetColumn(b) - 1;
+            int rowEnd = Grid.GetRow(b) + 1;
+            int colEnd = Grid.GetColumn(b) + 1;
 
-            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd, b, 1);
+            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd);
 
             for (int i = rowStart; i <= rowEnd; i++)
             {
@@ -314,12 +325,17 @@ namespace saper1
             }
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Exit_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if(e.LeftButton == MouseButtonState.Pressed)
             {
                 DragMove();
             }
+        }
+
+        private void exit_btn_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

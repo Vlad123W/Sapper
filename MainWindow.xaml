@@ -5,8 +5,55 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:saper1"
         mc:Ignorable="d"
-        Title="Sapper" Height="550" Width="550" ResizeMode="NoResize" WindowStyle="None" Background="Transparent" Foreground="Transparent" BorderBrush="Transparent" AllowsTransparency="True" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        Title="Sapper" Height="560" Width="560" ResizeMode="NoResize" WindowStyle="None" Background="Transparent" Foreground="Transparent" BorderBrush="Transparent" AllowsTransparency="True" WindowStartupLocation="CenterScreen">
     <Window.Resources>
+
+        <Storyboard x:Key="MainAnimation" RepeatBehavior="Forever" AutoReverse="True">
+            <ColorAnimation Storyboard.TargetName="lbrush"
+                            Storyboard.TargetProperty="GradientStops[0].Color"
+                            From="Violet" To="LightSkyBlue" Duration="0:0:10"/>
+            <ColorAnimation Storyboard.TargetName="lbrush"
+                            Storyboard.TargetProperty="GradientStops[1].Color"
+                            From="LightSkyBlue" To="Violet" Duration="0:0:10"/>
+        </Storyboard>
+
+        <Storyboard x:Key="BorderAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                             To="1.2" Duration="0:0:0.3" AutoReverse="False">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+
+        </Storyboard>
+
+        <Storyboard x:Key="BorderAnimationDec">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                      To="1" Duration="0:0:0.2" AutoReverse="False">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="BorderHorizontalAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                             To="2" Duration="0:0:0.4" AutoReverse="False">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <Storyboard x:Key="BorderHorizontalAnimationDec">
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                     To="1" Duration="0:0:0.4" AutoReverse="False">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
         <LinearGradientBrush x:Key="lbrush" StartPoint="0.5,0" EndPoint="1,0">
             <GradientStop Color="Violet" Offset="0"/>
             <GradientStop Color="LightSkyBlue" Offset="1"/>
@@ -41,24 +88,73 @@
         </Style>
 
         <Style x:Key="selectedSquare" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="#939c81"/>
+            <Setter Property="Background" Value="#445945"/>
             <Setter Property="BorderBrush" Value="Black"/>
             <Setter Property="CornerRadius" Value="3"/>
             <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" StrokeDashArray="1 2" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" SnapsToDevicePixels="true" StrokeThickness="1"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD"/>
+        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD"/>
+        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
+        <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FFC4E5F6"/>
+        <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+        <Style x:Key="RoundButton" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource lbrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Content" Value="X"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" CornerRadius="25" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Pressed.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Pressed.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Disabled.Border}"/>
+                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
     </Window.Resources>
 
     <Grid x:Name="MainContainer" Background="Transparent">
-        <Border x:Name="Toolbar" Panel.ZIndex="2" Height="18" VerticalAlignment="Top" CornerRadius="14" Background="Transparent" BorderThickness="1" Margin="522,10,10,0">
-            <Border.BorderBrush>
-                <LinearGradientBrush x:Name="MainToolbarBrush" StartPoint="0.5,0" EndPoint="1,0">
-                    <GradientStop Color="Violet" Offset="0"/>
-                    <GradientStop Color="LightSkyBlue" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
-            
-        </Border>
         <Border x:Name="Main" Panel.ZIndex="1" Style="{StaticResource Gradient}">
             <Border.BorderBrush>
                 <LinearGradientBrush x:Name="lbrush" StartPoint="0.5,0" EndPoint="1,0">
@@ -66,75 +162,66 @@
                     <GradientStop Color="LightSkyBlue" Offset="1"/>
                 </LinearGradientBrush>
             </Border.BorderBrush>
-            <Border.Triggers>
-                <EventTrigger RoutedEvent="Border.Loaded">
-                    <BeginStoryboard>
-                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                            <ColorAnimation Storyboard.TargetName="lbrush"
-                                                    Storyboard.TargetProperty="GradientStops[0].Color"
-                                                    From="Violet" To="LightSkyBlue" Duration="0:0:10"/>
-                            <ColorAnimation Storyboard.TargetName="lbrush"
-                                                    Storyboard.TargetProperty="GradientStops[1].Color"
-                                                    From="LightSkyBlue" To="Violet" Duration="0:0:10"/>
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </Border.Triggers>
-            <Grid x:Name="playField" ShowGridLines="False" Height="500" Width="500">
-                <Grid.Resources>
-                    <Style TargetType="{x:Type ColumnDefinition}">
-                        <Setter Property="Width" Value="25"/>
-                    </Style>
-                    <Style TargetType="{x:Type RowDefinition}">
-                        <Setter Property="Height" Value="25"/>
-                    </Style>
-                </Grid.Resources>
+            <Grid x:Name="Items">
+                <Grid x:Name="playField" ShowGridLines="False" Height="500" Width="500" Margin="0,30,0,0">
+                    <Grid.Resources>
+                        <Style TargetType="{x:Type ColumnDefinition}">
+                            <Setter Property="Width" Value="25"/>
+                        </Style>
+                        <Style TargetType="{x:Type RowDefinition}">
+                            <Setter Property="Height" Value="25"/>
+                        </Style>
+                    </Grid.Resources>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                </Grid>
+                <Grid x:Name="Exit" Height="40" VerticalAlignment="Top" MouseDown="Exit_MouseDown">
+                    <Button x:Name="exit_btn" Style="{DynamicResource RoundButton}" Width="30" Height="30" Margin="516,10,10,0" VerticalAlignment="Top" Click="exit_btn_Click"/>
+                </Grid>
             </Grid>
         </Border>
     </Grid>
