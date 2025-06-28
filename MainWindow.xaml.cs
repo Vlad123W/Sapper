@@ -6,60 +6,58 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace saper1
 {
     public partial class MainWindow : Window
     {
         private const int GridSize = 20;
-        private const int MineProbability = 5;
+        private const int MineProbability = 6;
 
-        private bool _gameStarted = false;
-        private int _mineCount = 0;
-        private int _openedCells = 0;
+        private bool _gameStarted;
+        private int _mineCount;
+        private int _openedCells;
         private readonly HashSet<(int, int)> _visited = new();
         private readonly HashSet<(int, int)> _flagged = new();
 
-        private Border[,] _cells;
-        private TextBlock[,] _texts;
+        private readonly Border[,] _cells = new Border[GridSize, GridSize];
+        private readonly TextBlock[,] _texts = new TextBlock[GridSize, GridSize];
+        private readonly Random _rand = new();
+        private DispatcherTimer _timer;
+
+        private int _minutes;
+        private int _seconds;
+
+        private readonly Brush _openedCellBrush = new SolidColorBrush(Color.FromRgb(60, 63, 70));
 
         public MainWindow()
         {
             InitializeComponent();
             BuildGrid();
 
-            KeyDown += (s, e) =>
-            {
-                if (e.Key == Key.Escape)
-                    Close();
-            };
-
-            if (Resources["MainAnimation"] is Storyboard sb)
-                sb.Begin(Main);
+            KeyDown += (s, e) => { if (e.Key == Key.Escape) Close(); };
+            (Resources["MainAnimation"] as Storyboard)?.Begin(Main);
         }
 
         private void BuildGrid()
         {
-            _cells = new Border[GridSize, GridSize];
-            _texts = new TextBlock[GridSize, GridSize];
-
+            playField.Children.Clear();
             for (int row = 0; row < GridSize; row++)
             {
                 for (int col = 0; col < GridSize; col++)
                 {
                     var text = new TextBlock
                     {
-                        Text = " ",
-                        Visibility = Visibility.Collapsed,
-                        Foreground = Brushes.LightGreen,
-                        FontSize = 14,
-                        TextAlignment = TextAlignment.Center,
+                        Text = " ", Visibility = Visibility.Collapsed, Foreground = Brushes.LightGreen,
+                        FontSize = 14, TextAlignment = TextAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
 
                     var cell = new Border
                     {
+                        Name = $"Cell_{row}_{col}",
                         Style = (Style)FindResource("Playfield"),
                         Child = text
                     };
@@ -80,45 +78,41 @@ namespace saper1
         private void Cell_LeftClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is not Border cell) return;
-            int row = Grid.GetRow(cell);
-            int col = Grid.GetColumn(cell);
-            var text = _texts[row, col];
-
+            int row = Grid.GetRow(cell), col = Grid.GetColumn(cell);
             if (_flagged.Contains((row, col))) return;
 
             if (!_gameStarted)
             {
+                _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+                _timer.Tick += Timer_Tick;
+                _timer.Start();
                 PlaceMines(row, col);
                 CountAllMines();
-                RevealRadius(row, col);
+                RevealRecursive(row, col);
                 _gameStarted = true;
                 return;
             }
 
-            if (text.Text == "M")
-            {
-                EndGame(cell);
-            }
-            else
-            {
-                RevealRecursive(row, col);
-                CheckWin();
-            }
+            var text = _texts[row, col];
+            if (text.Text == "M") EndGame(cell);
+            else { RevealRecursive(row, col); CheckWin(); }
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            _seconds++;
+            if (_seconds == 60) { _minutes++; _seconds = 0; }
+            Time.Text = string.Format("{0:00}:{1:00}", _minutes, _seconds);
         }
 
         private void Cell_RightClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is not Border cell) return;
-            int row = Grid.GetRow(cell);
-            int col = Grid.GetColumn(cell);
+            int row = Grid.GetRow(cell), col = Grid.GetColumn(cell);
+            if (!_gameStarted || _cells[row, col].Background == _openedCellBrush) return;
 
-            if (!_gameStarted || _cells[row, col].Background == Brushes.Transparent) return;
-
-            if (_flagged.Contains((row, col)))
-            {
-                _flagged.Remove((row, col));
+            if (_flagged.Remove((row, col)))
                 cell.Style = (Style)FindResource("Playfield");
-            }
             else
             {
                 _flagged.Add((row, col));
@@ -128,12 +122,12 @@ namespace saper1
 
         private void PlaceMines(int safeRow, int safeCol)
         {
-            var rand = new Random();
+            _mineCount = 0;
             for (int i = 0; i < GridSize; i++)
                 for (int j = 0; j < GridSize; j++)
                 {
                     if (Math.Abs(i - safeRow) <= 1 && Math.Abs(j - safeCol) <= 1) continue;
-                    if (rand.Next(40) < MineProbability)
+                    if (_rand.Next(40) < MineProbability)
                     {
                         _texts[i, j].Text = "M";
                         _mineCount++;
@@ -152,8 +146,8 @@ namespace saper1
                         for (int dy = -1; dy <= 1; dy++)
                         {
                             int ni = i + dx, nj = j + dy;
-                            if (ni < 0 || nj < 0 || ni >= GridSize || nj >= GridSize || _texts[ni, nj].Text != "M") continue;
-                            count++;
+                            if (ni >= 0 && ni < GridSize && nj >= 0 && nj < GridSize && _texts[ni, nj].Text == "M")
+                                count++;
                         }
                     _texts[i, j].Text = count == 0 ? string.Empty : count.ToString();
                 }
@@ -161,18 +155,23 @@ namespace saper1
 
         private void RevealRecursive(int row, int col)
         {
-            if (row < 0 || row >= GridSize || col < 0 || col >= GridSize) return;
+            if (row < 0 || col < 0 || row >= GridSize || col >= GridSize) return;
             if (_visited.Contains((row, col)) || _flagged.Contains((row, col))) return;
 
             var cell = _cells[row, col];
             var text = _texts[row, col];
-
-            if (text.Text == "M" || cell.Background == Brushes.Transparent) return;
+            if (text.Text == "M" || cell.Background == _openedCellBrush) return;
 
             _visited.Add((row, col));
-            cell.Background = Brushes.Transparent;
+            cell.Background = _openedCellBrush;
             text.Visibility = Visibility.Visible;
             _openedCells++;
+
+            if (FindResource("RevealCellAnimation") is Storyboard sb)
+            {
+                Storyboard.SetTarget(sb, cell);
+                sb.Begin();
+            }
 
             if (string.IsNullOrEmpty(text.Text))
             {
@@ -183,15 +182,13 @@ namespace saper1
             }
         }
 
-        private void RevealRadius(int startRow, int startCol) => RevealRecursive(startRow, startCol);
-
         private void EndGame(Border clicked)
         {
             foreach (var cell in _cells)
             {
                 if (cell.Child is TextBlock t && t.Text == "M")
                 {
-                    cell.Background = Brushes.Transparent;
+                    cell.Background = _openedCellBrush;
                     t.Visibility = Visibility.Visible;
                 }
             }
@@ -203,7 +200,9 @@ namespace saper1
 
         private void CheckWin()
         {
-            if (GridSize * GridSize - _openedCells == _mineCount)
+            int totalCells = GridSize * GridSize;
+            int revealed = _visited.Count;
+            if (totalCells - revealed == _mineCount)
             {
                 MessageBox.Show("You win!");
                 Application.Current.Shutdown();
@@ -215,7 +214,9 @@ namespace saper1
         private void Exit_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
-                DragMove();
+            {
+                try { DragMove(); } catch { }
+            }
         }
 
         private void refreshButton_Click(object sender, RoutedEventArgs e)
@@ -225,10 +226,12 @@ namespace saper1
                 _gameStarted = false;
                 _mineCount = 0;
                 _openedCells = 0;
+                _minutes = 0;
+                _seconds = 0;
+                Time.Text = "00:00";
                 _visited.Clear();
                 _flagged.Clear();
-
-                playField.Children.Clear();
+                _timer.Stop();
                 BuildGrid();
             }
         }
