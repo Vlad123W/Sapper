@@ -217,5 +217,20 @@ namespace saper1
             if (e.LeftButton == MouseButtonState.Pressed)
                 DragMove();
         }
+
+        private void refreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Точно?", "Caution", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                _gameStarted = false;
+                _mineCount = 0;
+                _openedCells = 0;
+                _visited.Clear();
+                _flagged.Clear();
+
+                playField.Children.Clear();
+                BuildGrid();
+            }
+        }
     }
 }

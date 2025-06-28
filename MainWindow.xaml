@@ -125,11 +125,12 @@
     </Window.Resources>
 
     <Grid x:Name="MainContainer">
-        <Border x:Name="Main" Style="{StaticResource Gradient}">
+        <Border x:Name="Main" Style="{StaticResource Gradient}" MouseDown="Exit_MouseDown">
             <Grid>
                 <Grid Height="50" VerticalAlignment="Top" Background="Transparent">
                     <TextBlock Style="{StaticResource WindowTitle}" Text="Сапер" Margin="48,0,0,0"/>
-                    <Button x:Name="exit_btn" Style="{StaticResource RoundButton}" Click="exit_btn_Click" Margin="0,5,5,0" HorizontalAlignment="Right"/>
+                    <Button x:Name="exit_btn" Style="{StaticResource RoundButton}" Click="exit_btn_Click" Margin="0,5,15,0" HorizontalAlignment="Right" Content="✕" Background="#00000000"/>
+                    <Button x:Name="refreshButton" Content="🗘" HorizontalAlignment="Left" Margin="615,5,0,0" VerticalAlignment="Top" Style="{DynamicResource RoundButton}" HorizontalContentAlignment="Center" FontSize="24" Click="refreshButton_Click"/>
                 </Grid>
 
                 <Grid x:Name="playField" Height="650" Width="650" Margin="0,50,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">

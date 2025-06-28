@@ -10,7 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="rotation.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="land-mine.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="rotation.png" />
   </ItemGroup>
 
 </Project>
