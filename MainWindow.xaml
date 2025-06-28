@@ -5,174 +5,142 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:saper1"
         mc:Ignorable="d"
-        Title="Sapper" Height="560" Width="560" ResizeMode="NoResize" WindowStyle="None" Background="Transparent" Foreground="Transparent" BorderBrush="Transparent" AllowsTransparency="True" WindowStartupLocation="CenterScreen">
+        Title="Sapper" Height="720" Width="755" ResizeMode="NoResize" WindowStyle="None"
+        Background="#121212" Foreground="White" BorderBrush="Transparent"
+        AllowsTransparency="True" WindowStartupLocation="CenterScreen">
+
     <Window.Resources>
-
-        <Storyboard x:Key="MainAnimation" RepeatBehavior="Forever" AutoReverse="True">
-            <ColorAnimation Storyboard.TargetName="lbrush"
-                            Storyboard.TargetProperty="GradientStops[0].Color"
-                            From="Violet" To="LightSkyBlue" Duration="0:0:10"/>
-            <ColorAnimation Storyboard.TargetName="lbrush"
-                            Storyboard.TargetProperty="GradientStops[1].Color"
-                            From="LightSkyBlue" To="Violet" Duration="0:0:10"/>
-        </Storyboard>
-
-        <Storyboard x:Key="BorderAnimation">
-            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
-                             To="1.2" Duration="0:0:0.3" AutoReverse="False">
-                <DoubleAnimation.EasingFunction>
-                    <SineEase EasingMode="EaseInOut"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-
-        </Storyboard>
-
-        <Storyboard x:Key="BorderAnimationDec">
-            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
-                      To="1" Duration="0:0:0.2" AutoReverse="False">
-                <DoubleAnimation.EasingFunction>
-                    <SineEase EasingMode="EaseInOut"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-        </Storyboard>
-
-        <Storyboard x:Key="BorderHorizontalAnimation">
-            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
-                             To="2" Duration="0:0:0.4" AutoReverse="False">
-                <DoubleAnimation.EasingFunction>
-                    <SineEase EasingMode="EaseInOut"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-        </Storyboard>
-
-        <Storyboard x:Key="BorderHorizontalAnimationDec">
-            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
-                     To="1" Duration="0:0:0.4" AutoReverse="False">
-                <DoubleAnimation.EasingFunction>
-                    <SineEase EasingMode="EaseInOut"/>
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-        </Storyboard>
-
-        <LinearGradientBrush x:Key="lbrush" StartPoint="0.5,0" EndPoint="1,0">
-            <GradientStop Color="Violet" Offset="0"/>
-            <GradientStop Color="LightSkyBlue" Offset="1"/>
-        </LinearGradientBrush>
-
+        <SolidColorBrush x:Key="MainBorderBrush" Color="#FF333333"/>
         <Style x:Key="Gradient" TargetType="{x:Type Border}">
-            <Setter Property="BorderBrush" Value="{StaticResource lbrush}"/>
-            <Setter Property="BorderThickness" Value="2"/>
-            <Setter Property="CornerRadius" Value="16"/>
-            <Setter Property="Background" Value="#212121"/>
+            <Setter Property="BorderBrush" Value="{StaticResource MainBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="5"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#1E1E1E"/>
+                        <GradientStop Offset="1" Color="#2A2D2E"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#FF333333" BlurRadius="25" ShadowDepth="0" Opacity="0.8"/>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="Playfield" TargetType="{x:Type Border}">
-            <Setter Property="BorderBrush">
+            <Setter Property="Background" Value="#2C2F33"/>
+            <Setter Property="Opacity" Value="0.9"/>
+            <Setter Property="BorderBrush" Value="#4F5257"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
                 <Setter.Value>
-                    <SolidColorBrush Color="#555759"/>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
                 </Setter.Value>
             </Setter>
-            <Setter Property="Opacity" Value="0.5"/>
-            <Setter Property="Background" Value="#7b828c"/>
-            <Setter Property="CornerRadius" Value="3"/>
-            <Setter Property="BorderThickness" Value="1"/>
-
+            <Setter Property="Margin" Value="2"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#424549"/>
                     <Setter Property="Opacity" Value="1"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="False">
-                    <Setter Property="Opacity" Value="0.5"/>
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#FF4F5257" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="selectedSquare" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="#445945"/>
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="CornerRadius" Value="3"/>
-            <Setter Property="BorderThickness" Value="2"/>
-        </Style>
-        <Style x:Key="FocusVisual">
-            <Setter Property="Control.Template">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="BorderBrush" Value="#388E3C"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="Effect">
                 <Setter.Value>
-                    <ControlTemplate>
-                        <Rectangle Margin="2" StrokeDashArray="1 2" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" SnapsToDevicePixels="true" StrokeThickness="1"/>
-                    </ControlTemplate>
+                    <DropShadowEffect Color="#4CAF50" BlurRadius="20" ShadowDepth="0" Opacity="0.9"/>
                 </Setter.Value>
             </Setter>
         </Style>
-        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD"/>
-        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070"/>
-        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD"/>
-        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1"/>
-        <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FFC4E5F6"/>
-        <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B"/>
-        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4"/>
-        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5"/>
-        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
+
         <Style x:Key="RoundButton" TargetType="{x:Type Button}">
-            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="{StaticResource lbrush}"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="1"/>
-            <Setter Property="Content" Value="X"/>
-            <Setter Property="FontSize" Value="17"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="border" CornerRadius="25" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
-                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        <Border x:Name="border" CornerRadius="20"
+                                Background="#36393F"
+                                BorderBrush="{StaticResource MainBorderBrush}" BorderThickness="3"
+                                Effect="{x:Null}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsDefaulted" Value="true">
-                                <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4F5257"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#FF4F5257" BlurRadius="12" ShadowDepth="0" Opacity="0.7"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
-                            <Trigger Property="IsMouseOver" Value="true">
-                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="true">
-                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Pressed.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Pressed.Border}"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="false">
-                                <Setter Property="Background" TargetName="border" Value="{StaticResource Button.Disabled.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.Disabled.Border}"/>
-                                <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2C2F33"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#FF333333" BlurRadius="7" ShadowDepth="0" Opacity="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Content" Value="✕"/>
         </Style>
 
+        <Style x:Key="WindowTitle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="Light"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="25,0,0,0"/>
+            <Setter Property="Text" Value="Sapper"/>
+        </Style>
     </Window.Resources>
 
-    <Grid x:Name="MainContainer" Background="Transparent">
-        <Border x:Name="Main" Panel.ZIndex="1" Style="{StaticResource Gradient}">
-            <Border.BorderBrush>
-                <LinearGradientBrush x:Name="lbrush" StartPoint="0.5,0" EndPoint="1,0">
-                    <GradientStop Color="Violet" Offset="0"/>
-                    <GradientStop Color="LightSkyBlue" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.BorderBrush>
-            <Grid x:Name="Items">
-                <Grid x:Name="playField" ShowGridLines="False" Height="500" Width="500" Margin="0,30,0,0">
+    <Grid x:Name="MainContainer">
+        <Border x:Name="Main" Style="{StaticResource Gradient}">
+            <Grid>
+                <Grid Height="50" VerticalAlignment="Top" Background="Transparent">
+                    <TextBlock Style="{StaticResource WindowTitle}" Text="Сапер" Margin="48,0,0,0"/>
+                    <Button x:Name="exit_btn" Style="{StaticResource RoundButton}" Click="exit_btn_Click" Margin="0,5,5,0" HorizontalAlignment="Right"/>
+                </Grid>
+
+                <Grid x:Name="playField" Height="650" Width="650" Margin="0,50,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.Resources>
                         <Style TargetType="{x:Type ColumnDefinition}">
-                            <Setter Property="Width" Value="25"/>
+                            <Setter Property="Width" Value="32.5"/>
                         </Style>
                         <Style TargetType="{x:Type RowDefinition}">
-                            <Setter Property="Height" Value="25"/>
+                            <Setter Property="Height" Value="32.5"/>
                         </Style>
                     </Grid.Resources>
-
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -195,7 +163,6 @@
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -219,11 +186,7 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                 </Grid>
-                <Grid x:Name="Exit" Height="40" VerticalAlignment="Top" MouseDown="Exit_MouseDown">
-                    <Button x:Name="exit_btn" Style="{DynamicResource RoundButton}" Width="30" Height="30" Margin="516,10,10,0" VerticalAlignment="Top" Click="exit_btn_Click"/>
-                </Grid>
             </Grid>
         </Border>
     </Grid>
-
 </Window>

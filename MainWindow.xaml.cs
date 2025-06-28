@@ -1,341 +1,221 @@
-﻿using System.Windows;
+﻿// File: MainWindow.xaml.cs
+using System;
+using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
-
 namespace saper1
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        private bool bombFilling = false;
-        public bool BombFilling { get => bombFilling; set => bombFilling = value; }
+        private const int GridSize = 20;
+        private const int MineProbability = 5;
 
-        private int ninesOnField;
+        private bool _gameStarted = false;
+        private int _mineCount = 0;
+        private int _openedCells = 0;
+        private readonly HashSet<(int, int)> _visited = new();
+        private readonly HashSet<(int, int)> _flagged = new();
 
-        public int MinesOnField
-        {
-            get => ninesOnField;
-            set => ninesOnField = value;
-        }
-
-        private int openedCells;
-
-        public int OpenedCells
-        {
-            get { return openedCells; }
-            set { openedCells = value; }
-        }
+        private Border[,] _cells;
+        private TextBlock[,] _texts;
 
         public MainWindow()
         {
             InitializeComponent();
-
-            Main.Loaded += (s, e) =>
-            {
-                Storyboard _storyboard = (Storyboard)Resources["MainAnimation"];
-                _storyboard.Begin(Main);
-            };
-
-            Loaded += (s, e) =>
-            {              
-                for (int i = 0; i < playField.ColumnDefinitions.Count; i++)
-                {
-                    for (int j = 0; j < playField.RowDefinitions.Count; j++)
-                    {
-                        TextBlock block = new()
-                        {
-                            Text = " ",
-                            Foreground = Brushes.LightGreen,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            TextAlignment = TextAlignment.Center,
-                            FontSize = 14,
-                            Visibility = Visibility.Collapsed
-                        };
-
-                        Border border = new()
-                        {
-                            Height = block.Height,
-                            Width = block.Width,
-                            Child = block,
-                            Style = (Style)FindResource("Playfield")
-                        };
-                       
-                        border.MouseLeftButtonDown += Actions;
-                        border.MouseRightButtonDown += PointMine;                       
-                        Grid.SetRow(border, i);
-                        Grid.SetColumn(border, j);
-
-                        playField.Children.Add(border);
-                    }
-                }  
-            };
+            BuildGrid();
 
             KeyDown += (s, e) =>
             {
-                if(e.Key == Key.Escape)
-                {
-                    Application.Current.Shutdown();
-                }
+                if (e.Key == Key.Escape)
+                    Close();
             };
+
+            if (Resources["MainAnimation"] is Storyboard sb)
+                sb.Begin(Main);
         }
 
-        private void PointMine(object sender, MouseButtonEventArgs e)
+        private void BuildGrid()
         {
-            Border? border = sender as Border;
+            _cells = new Border[GridSize, GridSize];
+            _texts = new TextBlock[GridSize, GridSize];
 
-            if (border != null && border.Background is SolidColorBrush brush && BombFilling)
+            for (int row = 0; row < GridSize; row++)
             {
-                Color currentColor = brush.Color;
-                Color targetColor = (Color)ColorConverter.ConvertFromString("#7b828c");
+                for (int col = 0; col < GridSize; col++)
+                {
+                    var text = new TextBlock
+                    {
+                        Text = " ",
+                        Visibility = Visibility.Collapsed,
+                        Foreground = Brushes.LightGreen,
+                        FontSize = 14,
+                        TextAlignment = TextAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
 
-                if (currentColor == targetColor)
-                {
-                    border.Style = (Style)FindResource("selectedSquare");
-                }
-                else if(border.Background != Brushes.Transparent)
-                {
-                    border.Style = (Style)FindResource("Playfield");
+                    var cell = new Border
+                    {
+                        Style = (Style)FindResource("Playfield"),
+                        Child = text
+                    };
+
+                    cell.MouseLeftButtonDown += Cell_LeftClick;
+                    cell.MouseRightButtonDown += Cell_RightClick;
+
+                    Grid.SetRow(cell, row);
+                    Grid.SetColumn(cell, col);
+                    playField.Children.Add(cell);
+
+                    _cells[row, col] = cell;
+                    _texts[row, col] = text;
                 }
             }
         }
 
-        private void Actions(object sender, MouseButtonEventArgs e)
+        private void Cell_LeftClick(object sender, MouseButtonEventArgs e)
         {
-            Border? border = sender as Border;
-            if(!BombFilling)
+            if (sender is not Border cell) return;
+            int row = Grid.GetRow(cell);
+            int col = Grid.GetColumn(cell);
+            var text = _texts[row, col];
+
+            if (_flagged.Contains((row, col))) return;
+
+            if (!_gameStarted)
             {
-                Random rand = new Random();
-                foreach (Border element in playField.Children)
-                {
-                    if(element.Child is TextBlock block && element.GetHashCode() != border?.GetHashCode())
-                    {
-                        int randNumber = rand.Next(0, 40);
-                        if (randNumber > 0 && randNumber < 10)
-                        {
-                            block.Text = "M";
-                            MinesOnField++;
-                        }
-                    }
-                }
+                PlaceMines(row, col);
+                CountAllMines();
+                RevealRadius(row, col);
+                _gameStarted = true;
+                return;
+            }
 
-                foreach (Border item in playField.Children)
-                {
-                    CountMinesForAllCells(item);
-                }
-
-                ShowStartView(4, border!);
-
-                OpenedCells++;
-                bombFilling = true;
+            if (text.Text == "M")
+            {
+                EndGame(cell);
             }
             else
             {
-                if(border?.Child is TextBlock block)
-                {
-
-                    if(block.Text == "M")
-                    {
-                        MessageBox.Show("Game over!");
-                        App.Current.Shutdown();
-                        border.Background = Brushes.Transparent;
-                        block.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        int mines = CountNearbyMines(border);
-
-                        if(mines == 0 && border.Background != Brushes.Transparent)
-                        {
-                            ShowCell(border);
-                        }
-
-                        if(400 - OpenedCells == MinesOnField)
-                        {
-                            MessageBox.Show("You win!");
-                            App.Current.Shutdown();
-                        }
-
-                        border.Background = Brushes.Transparent;
-                        block.Visibility = Visibility.Visible;
-                        OpenedCells++;
-                    }
-                }
+                RevealRecursive(row, col);
+                CheckWin();
             }
         }
 
-        private void InitializeVariables(ref int rowStart, ref int colStart, ref int rowEnd, ref int colEnd)
+        private void Cell_RightClick(object sender, MouseButtonEventArgs e)
         {
-           
-            if (colStart < 0)
-            {
-                colStart = 0;
-            }
+            if (sender is not Border cell) return;
+            int row = Grid.GetRow(cell);
+            int col = Grid.GetColumn(cell);
 
-            if (rowStart < 0)
-            {
-                rowStart = 0;
-            }
+            if (!_gameStarted || _cells[row, col].Background == Brushes.Transparent) return;
 
-            if (rowEnd > 20)
+            if (_flagged.Contains((row, col)))
             {
-                rowEnd = 20;
+                _flagged.Remove((row, col));
+                cell.Style = (Style)FindResource("Playfield");
             }
-
-            if (colEnd > 20)
+            else
             {
-                colEnd = 20;
+                _flagged.Add((row, col));
+                cell.Style = (Style)FindResource("selectedSquare");
             }
         }
 
-        private void ShowCell(Border b) => RevealSafeCells(Grid.GetRow(b), Grid.GetColumn(b));
-
-        private HashSet<(int, int)> visitedCells = new();
-
-        private void RevealSafeCells(int row, int col)
+        private void PlaceMines(int safeRow, int safeCol)
         {
-            if (visitedCells.Contains((row, col)))
-                return;
-
-            Border? element = playField.Children
-                .OfType<Border>()
-                .FirstOrDefault(e => Grid.GetRow(e) == row && Grid.GetColumn(e) == col);
-
-            if (element == null || element.Child is not TextBlock block)
-                return;
-
-            if (block.Text == "M")
-                return;
-
-            visitedCells.Add((row, col));
-
-            element.Background = Brushes.Transparent;
-            block.Visibility = Visibility.Visible;
-            openedCells++;
-
-            if (block.Text == string.Empty) 
-            {
-                for (int i = -1; i <= 1; i++)
+            var rand = new Random();
+            for (int i = 0; i < GridSize; i++)
+                for (int j = 0; j < GridSize; j++)
                 {
-                    for (int j = -1; j <= 1; j++)
+                    if (Math.Abs(i - safeRow) <= 1 && Math.Abs(j - safeCol) <= 1) continue;
+                    if (rand.Next(40) < MineProbability)
                     {
-                        if (i == 0 && j == 0)
-                            continue;
-
-                        int newRow = row + i;
-                        int newCol = col + j;
-
-                        if (newRow >= 0 && newRow < playField.RowDefinitions.Count &&
-                            newCol >= 0 && newCol < playField.ColumnDefinitions.Count)
-                        {
-                            RevealSafeCells(newRow, newCol);
-                        }
+                        _texts[i, j].Text = "M";
+                        _mineCount++;
                     }
                 }
-            }
         }
 
-        private int CountNearbyMines(Border clickedBorder)
+        private void CountAllMines()
         {
-            int count = 0;
-
-            int rowStart = Grid.GetRow(clickedBorder) - 1;
-            int colStart = Grid.GetColumn(clickedBorder) - 1;
-            int rowEnd = Grid.GetRow(clickedBorder) + 1;
-            int colEnd = Grid.GetColumn(clickedBorder) + 1;
-
-            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd);
-
-            for (int i = rowStart; i <= rowEnd; i++)
-            {
-                for (int j = colStart;  j <= colEnd; j++)
+            for (int i = 0; i < GridSize; i++)
+                for (int j = 0; j < GridSize; j++)
                 {
-                    var element = playField.Children
-                                  .OfType<Border>()
-                                  .FirstOrDefault(e => Grid.GetRow(e) == i && Grid.GetColumn(e) == j);
-
-                    if(element?.Child is TextBlock block)
-                    {
-                        if(block.Text == "M")
+                    if (_texts[i, j].Text == "M") continue;
+                    int count = 0;
+                    for (int dx = -1; dx <= 1; dx++)
+                        for (int dy = -1; dy <= 1; dy++)
                         {
+                            int ni = i + dx, nj = j + dy;
+                            if (ni < 0 || nj < 0 || ni >= GridSize || nj >= GridSize || _texts[ni, nj].Text != "M") continue;
                             count++;
                         }
-                    }
+                    _texts[i, j].Text = count == 0 ? string.Empty : count.ToString();
                 }
-            }
-        
-            return count;
         }
 
-        private void ShowStartView(int radius, Border startPositionBorder)
+        private void RevealRecursive(int row, int col)
         {
-            int rowStart = Grid.GetRow(startPositionBorder) - radius;
-            int colStart = Grid.GetColumn(startPositionBorder) - radius;
-            int rowEnd = Grid.GetRow(startPositionBorder) + radius;
-            int colEnd = Grid.GetColumn(startPositionBorder) + radius;
-            
-            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd);
-            
-            for (int i = rowStart; i <= rowEnd; i++)
-            {
-                for (int j = colStart; j <= colEnd; j++)
-                {
-                    var element = playField.Children
-                                  .OfType<Border>()
-                                  .FirstOrDefault(e => Grid.GetRow(e) == i && Grid.GetColumn(e) == j);
+            if (row < 0 || row >= GridSize || col < 0 || col >= GridSize) return;
+            if (_visited.Contains((row, col)) || _flagged.Contains((row, col))) return;
 
-                    if (element?.Child is TextBlock block && block.Text != "M")
-                    {
-                        element.Background = Brushes.Transparent;
-                        block.Visibility = Visibility.Visible;
-                        OpenedCells++;
-                    }
-                }
+            var cell = _cells[row, col];
+            var text = _texts[row, col];
+
+            if (text.Text == "M" || cell.Background == Brushes.Transparent) return;
+
+            _visited.Add((row, col));
+            cell.Background = Brushes.Transparent;
+            text.Visibility = Visibility.Visible;
+            _openedCells++;
+
+            if (string.IsNullOrEmpty(text.Text))
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                        if (dx != 0 || dy != 0)
+                            RevealRecursive(row + dx, col + dy);
             }
         }
 
-        private void CountMinesForAllCells(Border b)
+        private void RevealRadius(int startRow, int startCol) => RevealRecursive(startRow, startCol);
+
+        private void EndGame(Border clicked)
         {
-            int rowStart = Grid.GetRow(b) - 1;
-            int colStart = Grid.GetColumn(b) - 1;
-            int rowEnd = Grid.GetRow(b) + 1;
-            int colEnd = Grid.GetColumn(b) + 1;
-
-            InitializeVariables(ref rowStart, ref colStart, ref rowEnd, ref colEnd);
-
-            for (int i = rowStart; i <= rowEnd; i++)
+            foreach (var cell in _cells)
             {
-                for (int j = colStart; j <= colEnd; j++)
+                if (cell.Child is TextBlock t && t.Text == "M")
                 {
-                    var element = playField.Children
-                                  .OfType<Border>()
-                                  .FirstOrDefault(e => Grid.GetRow(e) == i && Grid.GetColumn(e) == j);
-
-                    if (element?.Child is TextBlock block && block.Text != "M")
-                    {
-                        int mines = CountNearbyMines(element);
-                        block.Text = mines == 0 ? "" : mines.ToString();
-                    }
+                    cell.Background = Brushes.Transparent;
+                    t.Visibility = Visibility.Visible;
                 }
             }
+
+            clicked.Background = Brushes.Red;
+            MessageBox.Show("Game over!");
+            Close();
         }
+
+        private void CheckWin()
+        {
+            if (GridSize * GridSize - _openedCells == _mineCount)
+            {
+                MessageBox.Show("You win!");
+                Application.Current.Shutdown();
+            }
+        }
+
+        private void exit_btn_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
         private void Exit_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(e.LeftButton == MouseButtonState.Pressed)
-            {
+            if (e.LeftButton == MouseButtonState.Pressed)
                 DragMove();
-            }
-        }
-
-        private void exit_btn_Click(object sender, RoutedEventArgs e)
-        {
-            Application.Current.Shutdown();
         }
     }
 }
