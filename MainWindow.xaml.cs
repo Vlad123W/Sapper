@@ -7,50 +7,174 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace saper1
 {
     public partial class MainWindow : Window
     {
-        private const int GridSize = 20;
-        private const int MineProbability = 6;
+        private int _gridSize;
+        private int _mineProbability;
 
         private bool _gameStarted;
+        private bool _isSettingsPanelOpen = false;
+
         private int _mineCount;
         private int _openedCells;
         private readonly HashSet<(int, int)> _visited = new();
         private readonly HashSet<(int, int)> _flagged = new();
 
-        private readonly Border[,] _cells = new Border[GridSize, GridSize];
-        private readonly TextBlock[,] _texts = new TextBlock[GridSize, GridSize];
+        private Border[,] _cells;
+        private TextBlock[,] _texts;
         private readonly Random _rand = new();
         private DispatcherTimer _timer;
 
         private int _minutes;
         private int _seconds;
 
-        private readonly Brush _openedCellBrush = new SolidColorBrush(Color.FromRgb(60, 63, 70));
+        private Brush _openedCellBrush;
+
+        private string _difficulty;
+        private string _theme;
 
         public MainWindow()
         {
             InitializeComponent();
+            LoadSettings();
+            ApplySettings();
             BuildGrid();
 
             KeyDown += (s, e) => { if (e.Key == Key.Escape) Close(); };
             (Resources["MainAnimation"] as Storyboard)?.Begin(Main);
         }
 
+        private void LoadSettings()
+        {
+            string settingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "scfg");
+            string settingsFilePath = Path.Combine(settingsDirectory, "myconfig.json");
+
+            if (!Directory.Exists(settingsDirectory))
+            {
+                Directory.CreateDirectory(settingsDirectory);
+            }
+
+            _difficulty = "Новачок";
+            _theme = "Темна";
+
+            if (File.Exists(settingsFilePath))
+            {
+                try
+                {
+                    var json = File.ReadAllText(settingsFilePath);
+                    var settings = JsonConvert.DeserializeObject<SettingsService>(json);
+                    _difficulty = settings?.Difficulty ?? _difficulty;
+                    _theme = settings?.Theme ?? _theme;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Не вдалося завантажити конфігурацію: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+
+            Loaded += (_, __) =>
+            {
+                foreach (ComboBoxItem item in difficultyComboBox.Items)
+                {
+                    if ((item.Content?.ToString() ?? "") == _difficulty)
+                    {
+                        difficultyComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
+
+                foreach (ComboBoxItem item in themeComboBox.Items)
+                {
+                    if ((item.Content?.ToString() ?? "") == _theme)
+                    {
+                        themeComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
+            };
+        }
+
+        private void ApplySettings()
+        {
+            switch (_difficulty)
+            {
+                case "Новачок":
+                    _gridSize = 10;
+                    _mineProbability = 6;
+                    break;
+                case "Любитель":
+                    _gridSize = 15;
+                    _mineProbability = 7;
+                    break;
+                case "Професіонал":
+                    _gridSize = 20;
+                    _mineProbability = 8;
+                    break;
+                default:
+                    _gridSize = 10;
+                    _mineProbability = 6;
+                    break;
+            }
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            string themeFile = _theme == "Світла" ? "Themes/LightTheme.xaml" : "Themes/DarkTheme.xaml";
+
+            try
+            {
+                var dict = new ResourceDictionary
+                {
+                    Source = new Uri(themeFile, UriKind.Relative)
+                };
+
+                Resources.MergedDictionaries.Clear();
+                Resources.MergedDictionaries.Add(dict);
+
+                _openedCellBrush = _theme == "Світла"
+                    ? new SolidColorBrush(Color.FromRgb(220, 220, 220))
+                    : new SolidColorBrush(Color.FromRgb(60, 63, 70));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не вдалося застосувати тему: {ex.Message}", "Помилка теми", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         private void BuildGrid()
         {
+            _cells = new Border[_gridSize, _gridSize];
+            _texts = new TextBlock[_gridSize, _gridSize];
+
             playField.Children.Clear();
-            for (int row = 0; row < GridSize; row++)
+            playField.RowDefinitions.Clear();
+            playField.ColumnDefinitions.Clear();
+
+            for (int i = 0; i < _gridSize; i++)
             {
-                for (int col = 0; col < GridSize; col++)
+                playField.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                playField.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
+
+            double fontSize = Math.Max(12, 500.0 / _gridSize * 0.4); 
+
+            for (int row = 0; row < _gridSize; row++)
+            {
+                for (int col = 0; col < _gridSize; col++)
                 {
                     var text = new TextBlock
                     {
-                        Text = " ", Visibility = Visibility.Collapsed, Foreground = Brushes.LightGreen,
-                        FontSize = 14, TextAlignment = TextAlignment.Center,
+                        Text = " ",
+                        Visibility = Visibility.Collapsed,
+                        Foreground = (Brush)FindResource("TextForeground"), 
+                        FontSize = fontSize,
+                        TextAlignment = TextAlignment.Center,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
@@ -123,11 +247,11 @@ namespace saper1
         private void PlaceMines(int safeRow, int safeCol)
         {
             _mineCount = 0;
-            for (int i = 0; i < GridSize; i++)
-                for (int j = 0; j < GridSize; j++)
+            for (int i = 0; i < _gridSize; i++)
+                for (int j = 0; j < _gridSize; j++)
                 {
                     if (Math.Abs(i - safeRow) <= 1 && Math.Abs(j - safeCol) <= 1) continue;
-                    if (_rand.Next(40) < MineProbability)
+                    if (_rand.Next(40) < _mineProbability)
                     {
                         _texts[i, j].Text = "M";
                         _mineCount++;
@@ -137,8 +261,8 @@ namespace saper1
 
         private void CountAllMines()
         {
-            for (int i = 0; i < GridSize; i++)
-                for (int j = 0; j < GridSize; j++)
+            for (int i = 0; i < _gridSize; i++)
+                for (int j = 0; j < _gridSize; j++)
                 {
                     if (_texts[i, j].Text == "M") continue;
                     int count = 0;
@@ -146,7 +270,7 @@ namespace saper1
                         for (int dy = -1; dy <= 1; dy++)
                         {
                             int ni = i + dx, nj = j + dy;
-                            if (ni >= 0 && ni < GridSize && nj >= 0 && nj < GridSize && _texts[ni, nj].Text == "M")
+                            if (ni >= 0 && ni < _gridSize && nj >= 0 && nj < _gridSize && _texts[ni, nj].Text == "M")
                                 count++;
                         }
                     _texts[i, j].Text = count == 0 ? string.Empty : count.ToString();
@@ -155,7 +279,7 @@ namespace saper1
 
         private void RevealRecursive(int row, int col)
         {
-            if (row < 0 || col < 0 || row >= GridSize || col >= GridSize) return;
+            if (row < 0 || col < 0 || row >= _gridSize || col >= _gridSize) return;
             if (_visited.Contains((row, col)) || _flagged.Contains((row, col))) return;
 
             var cell = _cells[row, col];
@@ -196,18 +320,18 @@ namespace saper1
             _timer.Stop();
             clicked.Background = Brushes.Red;
             MessageBox.Show("Game over!");
-            Close();
+            Refresh();
         }
 
         private void CheckWin()
         {
-            int totalCells = GridSize * GridSize;
+            int totalCells = _gridSize * _gridSize;
             int revealed = _visited.Count;
             if (totalCells - revealed == _mineCount)
             {
                 _timer.Stop();
                 MessageBox.Show("You win!");
-                Application.Current.Shutdown();
+                Refresh();   
             }
         }
 
@@ -221,26 +345,92 @@ namespace saper1
             }
         }
 
+        private void Refresh()
+        {
+            _gameStarted = false;
+            _mineCount = 0;
+            _openedCells = 0;
+            _minutes = 0;
+            _seconds = 0;
+            Time.Text = "00:00";
+            _visited.Clear();
+            _flagged.Clear();
+            _timer.Stop();
+            BuildGrid();
+        }
+
         private void refreshButton_Click(object sender, RoutedEventArgs e)
         {
+            if(!_gameStarted) return;
             if (MessageBox.Show("Точно?", "Caution", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
-            {
-                _gameStarted = false;
-                _mineCount = 0;
-                _openedCells = 0;
-                _minutes = 0;
-                _seconds = 0;
-                Time.Text = "00:00";
-                _visited.Clear();
-                _flagged.Clear();
-                _timer.Stop();
-                BuildGrid();
-            }
+                Refresh();
         }
 
         private void settingsButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_isSettingsPanelOpen) return;
 
+            Storyboard openAnimation = (Storyboard)FindResource("OpenSettingsAnimation");
+            Overlay.Visibility = Visibility.Visible;
+            openAnimation.Begin(this);
+            _isSettingsPanelOpen = true;
+        }
+
+        private void closeSettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isSettingsPanelOpen)
+            {
+                return;
+            }
+
+            Storyboard closeAnimation = (Storyboard)FindResource("CloseSettingsAnimation");
+
+            closeAnimation.Completed += (s, _) => {
+                Overlay.Visibility = Visibility.Collapsed;
+            };
+
+            closeAnimation.Begin(this);
+            _isSettingsPanelOpen = false;
+        }
+
+        private void confirmButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _difficulty = (difficultyComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Новачок";
+                _theme = (themeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Темна";
+
+                SettingsService settings = new()
+                {
+                    Difficulty = _difficulty,
+                    Theme = _theme
+                };
+
+                string settingsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "scfg");
+                if (!Directory.Exists(settingsDirectory))
+                    Directory.CreateDirectory(settingsDirectory);
+
+                string settingsFilePath = Path.Combine(settingsDirectory, "myconfig.json");
+                File.WriteAllText(settingsFilePath, JsonConvert.SerializeObject(settings, Formatting.Indented));
+
+                closeSettingsButton_Click(sender, e);
+                _gameStarted = false;
+                _visited.Clear();
+                _flagged.Clear();
+                _openedCells = 0;
+                _minutes = 0;
+                _seconds = 0;
+                _timer?.Stop();
+                ApplySettings();
+                BuildGrid();
+
+                
+                ApplyTheme();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error saving settings: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

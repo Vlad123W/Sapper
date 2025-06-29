@@ -6,121 +6,56 @@
         AllowsTransparency="True" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
-        <!-- Common Brushes & Constants -->
-        <SolidColorBrush x:Key="MainBorderBrush" Color="#FF333333"/>
-        <SolidColorBrush x:Key="PlayfieldBackground" Color="#1A1C1F"/>
-        <SolidColorBrush x:Key="PlayfieldHoverBackground" Color="#2C2F33"/>
-        <SolidColorBrush x:Key="SelectedBackground" Color="#4CAF50"/>
-        <SolidColorBrush x:Key="SelectedBorder" Color="#388E3C"/>
-        <CornerRadius x:Key="CellCornerRadius">8</CornerRadius>
-        <Thickness x:Key="CellBorderThickness">1</Thickness>
-
-        <!-- Reveal Animation -->
         <Storyboard x:Key="RevealCellAnimation">
             <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             From="0" To="1" Duration="0:0:0.2"/>
+                         From="0" To="1" Duration="0:0:0.2"/>
             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
-                             From="0.8" To="1" Duration="0:0:0.2"/>
+                         From="0.8" To="1" Duration="0:0:0.2"/>
             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
-                             From="0.8" To="1" Duration="0:0:0.2"/>
+                         From="0.8" To="1" Duration="0:0:0.2"/>
         </Storyboard>
 
-        <!-- Cell Styles -->
-        <Style x:Key="Playfield" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource PlayfieldBackground}"/>
-            <Setter Property="Opacity" Value="0.9"/>
-            <Setter Property="BorderBrush" Value="#4F5257"/>
-            <Setter Property="CornerRadius" Value="{StaticResource CellCornerRadius}"/>
-            <Setter Property="BorderThickness" Value="{StaticResource CellBorderThickness}"/>
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Margin" Value="2"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource PlayfieldHoverBackground}"/>
-                    <Setter Property="Opacity" Value="1"/>
-                    <Setter Property="RenderTransform">
-                        <Setter.Value>
-                            <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <DropShadowEffect Color="#FF4F5257" BlurRadius="10" ShadowDepth="0" Opacity="0.6"/>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <Storyboard x:Key="OpenSettingsAnimation">
+            <DoubleAnimation Storyboard.TargetName="SettingsPanel" 
+                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                         From="-300" To="0" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="Overlay"
+                         Storyboard.TargetProperty="Opacity"
+                         From="0" To="1" Duration="0:0:0.3"/>
+        </Storyboard>
 
-        <Style x:Key="selectedSquare" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource SelectedBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource SelectedBorder}"/>
-            <Setter Property="CornerRadius" Value="{StaticResource CellCornerRadius}"/>
-            <Setter Property="BorderThickness" Value="3"/>
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect Color="#4CAF50" BlurRadius="20" ShadowDepth="0" Opacity="0.9"/>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="RoundButton" TargetType="Button">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="border" CornerRadius="20"
-                                Background="#36393F"
-                                BorderBrush="{StaticResource MainBorderBrush}" BorderThickness="3">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#4F5257"/>
-                                <Setter TargetName="border" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#FF4F5257" BlurRadius="12" ShadowDepth="0" Opacity="0.7"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2C2F33"/>
-                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
-                                <Setter TargetName="border" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#FF333333" BlurRadius="7" ShadowDepth="0" Opacity="0.9"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="Width" Value="45"/>
-            <Setter Property="Height" Value="45"/>
-        </Style>
+        <Storyboard x:Key="CloseSettingsAnimation">
+            <DoubleAnimation Storyboard.TargetName="SettingsPanel"
+                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                         From="0" To="-320" Duration="0:0:0.3">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn"/>
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetName="Overlay"
+                         Storyboard.TargetProperty="Opacity"
+                         From="1" To="0" Duration="0:0:0.3"/>
+        </Storyboard>
     </Window.Resources>
+
 
     <Grid x:Name="MainContainer">
         <Border x:Name="Main" Background="{StaticResource PlayfieldBackground}" BorderBrush="{StaticResource MainBorderBrush}" BorderThickness="5">
             <Grid>
-                <!-- Header -->
                 <Grid Height="50" VerticalAlignment="Top" Background="Transparent" MouseDown="Exit_MouseDown">
                     <Button x:Name="exit_btn" Style="{StaticResource RoundButton}" Click="exit_btn_Click" Margin="0,5,15,0" HorizontalAlignment="Right" Content="✕" Background="#00000000"/>
-                    <Button x:Name="refreshButton" Style="{StaticResource RoundButton}" Content="🗘" HorizontalAlignment="Left" Margin="615,5,0,0" VerticalAlignment="Top" Click="refreshButton_Click"/>
-                    <TextBlock x:Name="Time" HorizontalAlignment="Left" Margin="345,0,0,0" VerticalAlignment="Center" Height="26" Width="84" FontSize="18" TextAlignment="Center" Text="00:00"/>
-                    <Button x:Name="settingsButton" Content="⚙" HorizontalAlignment="Left" Margin="545,5,0,0" VerticalAlignment="Top" Style="{DynamicResource RoundButton}" FontSize="23" Click="settingsButton_Click"/>
+
+                    <Button x:Name="settingsButton" Style="{StaticResource RoundButton}" Content="⚙" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" FontSize="23" Click="settingsButton_Click"/>
+
+                    <Button x:Name="refreshButton" Style="{StaticResource RoundButton}" Content="🗘" HorizontalAlignment="Left" Margin="613,5,0,0" VerticalAlignment="Top" Click="refreshButton_Click"/>
+                    <TextBlock x:Name="Time" HorizontalAlignment="Center" VerticalAlignment="Center" Height="26" Width="84" FontSize="18" TextAlignment="Center" Text="00:00"/>
                 </Grid>
 
-                <!-- Game Grid -->
-                <Grid x:Name="playField" Height="650" Width="650" Margin="0,50,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid x:Name="playField" Height="650" Width="650" Margin="0,50,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowGridLines="False">
                     <Grid.Resources>
                         <Style TargetType="ColumnDefinition">
                             <Setter Property="Width" Value="32.5"/>
@@ -129,10 +64,7 @@
                             <Setter Property="Height" Value="32.5"/>
                         </Style>
                     </Grid.Resources>
-
-                    <!-- Define 20x20 Grid -->
                     <Grid.ColumnDefinitions>
-                        <!-- Repeat 20 times -->
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
@@ -155,7 +87,6 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <!-- Repeat 20 times -->
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -178,6 +109,50 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                 </Grid>
+
+                <Border x:Name="Overlay" Background="#80000000" Opacity="0" Visibility="Collapsed"/>
+
+                <Border x:Name="SettingsPanel"
+                        HorizontalAlignment="Left"
+                        Width="300"
+                        Background="{StaticResource PlayfieldBackground}"
+                        CornerRadius="0,10,10,0"
+                        RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <TranslateTransform X="-305"/>
+                    </Border.RenderTransform>
+                    <Grid>
+                        <Button x:Name="closeSettingsButton" 
+                                Content="✕" 
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Top" 
+                                Style="{DynamicResource RoundButton}" 
+                                FontSize="23" 
+                                Click="closeSettingsButton_Click"
+                                Margin="15,5,0,0"/>
+
+                        <StackPanel Margin="15,70,15,15">
+                            <TextBlock Text="Налаштування" FontSize="28" FontWeight="Bold" Margin="0,0,0,20" TextAlignment="Center"/>
+                            <TextBlock Text="Складність:" Margin="0,10"/>
+                            <ComboBox SelectedIndex="0" x:Name="difficultyComboBox">
+                                <ComboBoxItem>Новачок</ComboBoxItem>
+                                <ComboBoxItem>Любитель</ComboBoxItem>
+                                <ComboBoxItem>Професіонал</ComboBoxItem>
+                            </ComboBox>
+                            <TextBlock Text="Тема:" Margin="0,20,0,10"/>
+                            <ComboBox SelectedIndex="0" x:Name="themeComboBox">
+                                <ComboBoxItem>Темна</ComboBoxItem>
+                                <ComboBoxItem>Світла</ComboBoxItem>
+                            </ComboBox>
+
+                            <Button x:Name="confirmButton" 
+                                    Content="Підтвердити" 
+                                    Style="{StaticResource ConfirmButton}"
+                                    Margin="0,40,0,0"
+                                    Click="confirmButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
     </Grid>
