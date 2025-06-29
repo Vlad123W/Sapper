@@ -116,6 +116,7 @@
                     <Button x:Name="exit_btn" Style="{StaticResource RoundButton}" Click="exit_btn_Click" Margin="0,5,15,0" HorizontalAlignment="Right" Content="✕" Background="#00000000"/>
                     <Button x:Name="refreshButton" Style="{StaticResource RoundButton}" Content="🗘" HorizontalAlignment="Left" Margin="615,5,0,0" VerticalAlignment="Top" Click="refreshButton_Click"/>
                     <TextBlock x:Name="Time" HorizontalAlignment="Left" Margin="345,0,0,0" VerticalAlignment="Center" Height="26" Width="84" FontSize="18" TextAlignment="Center" Text="00:00"/>
+                    <Button x:Name="settingsButton" Content="⚙" HorizontalAlignment="Left" Margin="545,5,0,0" VerticalAlignment="Top" Style="{DynamicResource RoundButton}" FontSize="23" Click="settingsButton_Click"/>
                 </Grid>
 
                 <!-- Game Grid -->

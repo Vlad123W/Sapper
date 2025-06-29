@@ -193,6 +193,7 @@ namespace saper1
                 }
             }
 
+            _timer.Stop();
             clicked.Background = Brushes.Red;
             MessageBox.Show("Game over!");
             Close();
@@ -204,6 +205,7 @@ namespace saper1
             int revealed = _visited.Count;
             if (totalCells - revealed == _mineCount)
             {
+                _timer.Stop();
                 MessageBox.Show("You win!");
                 Application.Current.Shutdown();
             }
@@ -234,6 +236,11 @@ namespace saper1
                 _timer.Stop();
                 BuildGrid();
             }
+        }
+
+        private void settingsButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
