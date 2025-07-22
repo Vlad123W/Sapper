@@ -48,10 +48,10 @@
     <Grid x:Name="MainContainer">
         <Border x:Name="Main" Background="{DynamicResource PlayfieldBackground}" BorderBrush="{DynamicResource MainBorderBrush}" BorderThickness="5">
             <Grid>
-                <Grid Height="50" VerticalAlignment="Top" Background="Transparent" MouseDown="Exit_MouseDown">
-                    <Button x:Name="exit_btn" Style="{DynamicResource RoundButton}" Click="exit_btn_Click" Margin="0,5,15,0" HorizontalAlignment="Right" Content="✕" Background="#00000000"/>
-                    <Button x:Name="settingsButton" Style="{DynamicResource RoundButton}" Content="⚙" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" FontSize="23" Click="settingsButton_Click"/>
-                    <Button x:Name="refreshButton" Style="{DynamicResource RoundButton}" Content="🗘" HorizontalAlignment="Left" Margin="613,5,0,0" VerticalAlignment="Top" Click="refreshButton_Click"/>
+                <Grid Height="50" VerticalAlignment="Top" Background="Transparent" MouseDown="ExitPanel_MouseDown">
+                    <Button x:Name="exit_btn" Style="{DynamicResource RoundButton}" Click="ExitButton_Click" Margin="0,5,15,0" HorizontalAlignment="Right" Content="✕" Background="#00000000"/>
+                    <Button x:Name="settingsButton" Style="{DynamicResource RoundButton}" Content="⚙" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top" FontSize="23" Click="OpenSettingsButton_Click"/>
+                    <Button x:Name="refreshButton" Style="{DynamicResource RoundButton}" Content="🗘" HorizontalAlignment="Left" Margin="613,5,0,0" VerticalAlignment="Top" Click="RefreshButton_Click"/>
                     <TextBlock x:Name="Time" HorizontalAlignment="Center" VerticalAlignment="Center" Height="26" Width="84" FontSize="18" TextAlignment="Center" Text="00:00"/>
                 </Grid>
 
@@ -128,7 +128,7 @@
                                 VerticalAlignment="Top"
                                 Style="{DynamicResource RoundButton}"
                                 FontSize="23"
-                                Click="closeSettingsButton_Click"
+                                Click="CloseSettingsButton_Click"
                                 Margin="15,5,0,0"/>
 
                         <StackPanel Margin="15,70,15,15">
@@ -149,7 +149,7 @@
                                     Content="Підтвердити"
                                     Style="{DynamicResource ConfirmButton}"
                                     Margin="0,40,0,0"
-                                    Click="confirmButton_Click"/>
+                                    Click="ConfirmSettingsButton_Click"/>
                         </StackPanel>
                     </Grid>
                 </Border>

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace saper1
+namespace saper1.Data
 {
-    class SettingsService
+    public class Coordinates
     {
-        public string? Difficulty { get; set; }
-        public string? Theme { get; set; }
+        public byte X { get; set; }
+        public byte Y { get; set; }
     }
 }
