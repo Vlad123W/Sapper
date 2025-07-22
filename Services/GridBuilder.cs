@@ -14,7 +14,7 @@ namespace saper1.Services
 {
     public class GridBuilder : IGridBuilder
     {
-        public void BuildGrid(Grid targetGrid, int gridSize, Style cellStyle, Style flaggedStyle, Brush textColor, double fontSize, List<Cell> cells)
+        public void BuildGrid(Grid targetGrid, int gridSize, Style cellStyle, Style flaggedStyle, Brush textColor, float fontSize, List<Cell> cells)
         {
             targetGrid.Children.Clear();
             targetGrid.RowDefinitions.Clear();
@@ -52,7 +52,7 @@ namespace saper1.Services
                     Grid.SetColumn(cell, col);
                     targetGrid.Children.Add(cell);
                     
-                    cells.Add(new Cell(new() { X = (byte)row, Y = (byte)col}) { Border = cell });
+                    cells.Add(new Cell(new() { X = row, Y = col}) { Border = cell });
                 }
             }
         }

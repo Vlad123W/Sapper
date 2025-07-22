@@ -8,7 +8,7 @@ namespace saper1.Data
 {
     public class Coordinates
     {
-        public byte X { get; set; }
-        public byte Y { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }

@@ -25,6 +25,8 @@ namespace saper1
         private readonly IGridBuilder _gridBuilder;
 
         private int _gridSize;
+        private int _GridSquare => _gridSize * _gridSize;
+
         private int _mineProbability;
 
         private List<Cell> _cells = [];
@@ -82,7 +84,7 @@ namespace saper1
 
         private void BuildGrid()
         {
-            double fontSize = Math.Max(12, 500.0 / _gridSize * 0.4);
+            float fontSize = (float)Math.Max(12, 500.0 / _gridSize * 0.4);
 
             _gridBuilder.BuildGrid(
                 playField,
@@ -105,7 +107,7 @@ namespace saper1
         private void Cell_LeftClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is not Border cell) return;
-            int row = Grid.GetRow(cell), col = Grid.GetColumn(cell);
+            byte row = Convert.ToByte(Grid.GetRow(cell)), col = Convert.ToByte(Grid.GetColumn(cell));
             if (_cells.FirstOrDefault(x => x._coordinates.X == row && x._coordinates.Y == col)!.IsOpen
                 || _cells.FirstOrDefault(x => x._coordinates.X == row && x._coordinates.Y == col)!.IsFlagged) return;
 
@@ -140,7 +142,7 @@ namespace saper1
             else
             {
                 RevealRecursive(row, col);
-                if (_gameLogic.CheckWin(_gridSize, _mineMap.Count, _cells.Where(x => x.IsOpen).ToList().Count))
+                if (_gameLogic.CheckWin(_GridSquare, _mineMap.Count, _cells.Where(x => x.IsOpen).ToList().Count))
                 {
                     _gameTimer.Stop();
                     MessageBox.Show("You win!");

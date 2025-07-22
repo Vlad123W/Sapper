@@ -17,7 +17,7 @@ namespace saper1.Entities
         public bool IsMine { get; set; } = false;
         public bool IsOpen { get; set; } = false;
         public bool IsFlagged { get; set; } = false;
-        public byte AdjacentMines { get; set; } = 0;
+        public int AdjacentMines { get; set; } = 0;
 
         public Cell(Coordinates? coordinates)
         {

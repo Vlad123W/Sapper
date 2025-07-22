@@ -12,6 +12,6 @@ namespace saper1.IServices
 {
     public interface IGridBuilder
     {
-        void BuildGrid(Grid targetGrid, int gridSize, Style cellStyle, Style flaggedStyle, Brush textColor, double fontSize, List<Cell> cells);
+        void BuildGrid(Grid targetGrid, int gridSize, Style cellStyle, Style flaggedStyle, Brush textColor, float fontSize, List<Cell> cells);
     }
 }
