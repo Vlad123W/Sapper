@@ -44,20 +44,14 @@ namespace saper1.Services
             }
         }
 
-        public void Save(string difficulty, string theme)
+        public void Save(SettingsData settingsData)
         {
             try
             {
                 if (!Directory.Exists(_settingsDirectory))
                     Directory.CreateDirectory(_settingsDirectory);
 
-                var settings = new SettingsData
-                {
-                    Difficulty = difficulty,
-                    Theme = theme
-                };
-
-                File.WriteAllText(_settingsFilePath, JsonConvert.SerializeObject(settings, Formatting.Indented));
+                File.WriteAllText(_settingsFilePath, JsonConvert.SerializeObject(settingsData, Formatting.Indented));
             }
             catch (Exception ex)
             {

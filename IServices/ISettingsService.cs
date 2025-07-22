@@ -11,6 +11,6 @@ namespace saper1.IServices
     {
         SettingsData _settingsData { get; set; }
         void Load();
-        void Save(string difficulty, string theme);
+        void Save(SettingsData settingsData);
     }
 }

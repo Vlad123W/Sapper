@@ -25,10 +25,17 @@ namespace saper1
         private readonly IGridBuilder _gridBuilder;
 
         private int _gridSize;
-        private int _GridSquare => _gridSize * _gridSize;
+        private int GridSquare => _gridSize * _gridSize;
 
         private int _mineProbability;
 
+        private readonly Dictionary<string, int[]> difficultyConfig = new()
+        {
+            { "Новачок", new int[] { 10, 6 } },
+            { "Любитель", new int[]{ 15, 7 } },
+            { "Професіонал", new int[]{ 20, 8 } }
+        };
+        
         private List<Cell> _cells = [];
         private List<Cell> _mineMap;
 
@@ -63,13 +70,8 @@ namespace saper1
 
         private void ApplySettings()
         {
-            switch (_settingsService._settingsData.Difficulty)
-            {
-                case "Новачок": _gridSize = 10; _mineProbability = 6; break;
-                case "Любитель": _gridSize = 15; _mineProbability = 7; break;
-                case "Професіонал": _gridSize = 20; _mineProbability = 8; break;
-                default: _gridSize = 10; _mineProbability = 6; break;
-            }
+            _gridSize = difficultyConfig[_settingsService._settingsData.Difficulty][0];
+            _mineProbability = difficultyConfig[_settingsService._settingsData.Difficulty][1];
             
             difficultyComboBox.SelectedItem = difficultyComboBox.Items
                 .Cast<ComboBoxItem>()
@@ -107,9 +109,10 @@ namespace saper1
         private void Cell_LeftClick(object sender, MouseButtonEventArgs e)
         {
             if (sender is not Border cell) return;
-            byte row = Convert.ToByte(Grid.GetRow(cell)), col = Convert.ToByte(Grid.GetColumn(cell));
-            if (_cells.FirstOrDefault(x => x._coordinates.X == row && x._coordinates.Y == col)!.IsOpen
-                || _cells.FirstOrDefault(x => x._coordinates.X == row && x._coordinates.Y == col)!.IsFlagged) return;
+            int row = Grid.GetRow(cell), col = Grid.GetColumn(cell);
+
+            var properCell = _cells.FirstOrDefault(x => x.Coordinates.X == row && x.Coordinates.Y == col)!;
+            if (properCell.IsOpen || properCell.IsFlagged) return;
 
             if (!_gameStarted)
             {
@@ -122,7 +125,7 @@ namespace saper1
                 return;
             }
 
-            var potentionalCell = _cells.FirstOrDefault(x => x._coordinates!.X == row && x._coordinates.Y == col);
+            var potentionalCell = _cells.FirstOrDefault(x => x.Coordinates!.X == row && x.Coordinates.Y == col);
             bool IsMine = potentionalCell!.IsMine;
             
             if (IsMine)
@@ -142,7 +145,7 @@ namespace saper1
             else
             {
                 RevealRecursive(row, col);
-                if (_gameLogic.CheckWin(_GridSquare, _mineMap.Count, _cells.Where(x => x.IsOpen).ToList().Count))
+                if (_gameLogic.CheckWin(GridSquare, _mineMap.Count, _cells.Where(x => x.IsOpen).ToList().Count))
                 {
                     _gameTimer.Stop();
                     MessageBox.Show("You win!");
@@ -157,7 +160,7 @@ namespace saper1
             int row = Grid.GetRow(cell), col = Grid.GetColumn(cell);
             if (!_gameStarted || cell.Background == _themeManager.OpenedCellBrush) return;
 
-            var current = _cells.FirstOrDefault(x => x._coordinates.X == row && x._coordinates.Y == col);
+            var current = _cells.FirstOrDefault(x => x.Coordinates.X == row && x.Coordinates.Y == col);
             if (current!.IsFlagged)
             {
                 cell.Style = (Style)FindResource("Playfield");
@@ -174,7 +177,7 @@ namespace saper1
         {
             if (row < 0 || col < 0 || row >= _gridSize || col >= _gridSize) return;
 
-            var cell = _cells.FirstOrDefault(x => x._coordinates?.X == row && x._coordinates?.Y == col);
+            var cell = _cells.FirstOrDefault(x => x.Coordinates?.X == row && x.Coordinates?.Y == col);
             if (cell == null || cell.IsOpen || cell.IsFlagged) return;
 
             cell.IsOpen = true;
@@ -239,6 +242,7 @@ namespace saper1
         {
             _gameStarted = false;
             _gameTimer.Reset();
+            _mineMap.Clear();
             _cells.Clear();
             BuildGrid();
         }
@@ -259,8 +263,11 @@ namespace saper1
             try
             {
                 _settingsService.Save(
-                    (difficultyComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()!,
-                    (themeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()!);
+                                new()
+                                {
+                                  Difficulty = (difficultyComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()!,
+                                  Theme = (themeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()!
+                                });
 
                 ApplySettings();
                 CloseSettingsButton_Click(sender, e);

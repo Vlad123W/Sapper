@@ -19,8 +19,8 @@ namespace saper1.Services
 
                     if (_rand.Next(40) < mineProbability)
                     {
-                        var cell = texts.Where(c => c._coordinates!.X == i && c._coordinates.Y == j).FirstOrDefault();
-                        cell!.IsMine = true;
+                        var cell = texts.FirstOrDefault(c => c.Coordinates!.X == i && c.Coordinates.Y == j)!;
+                        cell.IsMine = true;
                         
                         if(cell.Border.Child is TextBlock block)
                         {
