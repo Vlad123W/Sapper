@@ -9,7 +9,7 @@ namespace saper1.IServices
 {
     public interface ISettingsService
     {
-        SettingsData _settingsData { get; set; }
+        SettingsData SettingsData { get; set; }
         void Load();
         void Save(SettingsData settingsData);
     }

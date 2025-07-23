@@ -15,7 +15,7 @@ namespace saper1.Services
         private const string FileName = "myconfig.json";
         private readonly string _settingsDirectory;
         private readonly string _settingsFilePath;
-        public SettingsData _settingsData { get; set; } = new(){Theme = "Темна", Difficulty = "Любитель"};
+        public SettingsData SettingsData { get; set; } = new(){Theme = "Темна", Difficulty = "Любитель"};
 
 
         public SettingsService()
@@ -34,7 +34,7 @@ namespace saper1.Services
                 if (File.Exists(_settingsFilePath))
                 {
                     var json = File.ReadAllText(_settingsFilePath);
-                    _settingsData = JsonConvert.DeserializeObject<SettingsData>(json)!;
+                    SettingsData = JsonConvert.DeserializeObject<SettingsData>(json)!;
                     
                 }
             }

@@ -20,7 +20,7 @@ namespace saper1.Services
             _openedCellBrush = openedCellBrush;
         }
 
-        public bool CheckWin(int gridSquare, int mineCount, int visited) => gridSquare - visited == mineCount;
+        public bool CheckWin(int gridSquare, int mineCount, int visited) => (gridSquare - visited) == mineCount;
 
         public void RevealAllMines(List<Cell> mineMap)
         {

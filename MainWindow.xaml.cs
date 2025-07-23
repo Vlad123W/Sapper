@@ -26,14 +26,14 @@ namespace saper1
 
         private int _gridSize;
         private int GridSquare => _gridSize * _gridSize;
-
         private int _mineProbability;
+        private int _minesNeeded;
 
         private readonly Dictionary<string, int[]> difficultyConfig = new()
         {
-            { "Новачок", new int[] { 10, 6 } },
-            { "Любитель", new int[]{ 15, 7 } },
-            { "Професіонал", new int[]{ 20, 8 } }
+            { "Новачок", new int[] { 10, 15 } },
+            { "Любитель", new int[]{ 15, 34 } },
+            { "Професіонал", new int[]{ 20, 60 } }
         };
         
         private List<Cell> _cells = [];
@@ -70,18 +70,18 @@ namespace saper1
 
         private void ApplySettings()
         {
-            _gridSize = difficultyConfig[_settingsService._settingsData.Difficulty][0];
-            _mineProbability = difficultyConfig[_settingsService._settingsData.Difficulty][1];
-            
+            _gridSize = difficultyConfig[_settingsService.SettingsData.Difficulty][0];
+            _minesNeeded = difficultyConfig[_settingsService.SettingsData.Difficulty][1];
+
             difficultyComboBox.SelectedItem = difficultyComboBox.Items
                 .Cast<ComboBoxItem>()
-                .FirstOrDefault(item => item.Content.ToString() == _settingsService._settingsData.Difficulty);
+                .FirstOrDefault(item => item.Content.ToString() == _settingsService.SettingsData.Difficulty);
             
             themeComboBox.SelectedItem = themeComboBox.Items
                 .Cast<ComboBoxItem>()
-                .FirstOrDefault(item => item.Content.ToString() == _settingsService._settingsData.Theme);
+                .FirstOrDefault(item => item.Content.ToString() == _settingsService.SettingsData.Theme);
             
-            _themeManager.ApplyTheme(_settingsService._settingsData.Theme, Resources);
+            _themeManager.ApplyTheme(_settingsService.SettingsData.Theme, Resources);
         }
 
         private void BuildGrid()
@@ -116,7 +116,7 @@ namespace saper1
 
             if (!_gameStarted)
             {
-                _minePlacer.PlaceMines(_gridSize, _mineProbability, row, col, _cells);
+                _minePlacer.PlaceMines(_gridSize, _minesNeeded, row, col, _cells);
                 _mineCounter.CountAllMines(_gridSize, _cells);
                 _gameTimer.Reset();
                 _gameTimer.Start();
